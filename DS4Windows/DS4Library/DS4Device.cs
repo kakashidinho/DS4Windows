@@ -1359,11 +1359,26 @@ namespace DS4Windows
 
                     haptime = haptime || change;
                 }
+                else if ((this.featureSet & VidPidFeatureSet.OnlyOutputRumbleData05) != 0)
+                {
+                    for (int i = 0; i < 32; ++i)
+                    {
+                        outReportBuffer[i] = 0;
+                    }
+                    outReportBuffer[0] = 0x05;
+                    outReportBuffer[1] = 0x01;
+                    outReportBuffer[4] = currentHap.RumbleMotorStrengthRightLightFast; // fast motor
+                    outReportBuffer[5] = currentHap.RumbleMotorStrengthLeftHeavySlow; // slow  motor
+
+                    haptime = haptime || outputReport[4] != outReportBuffer[4] || outputReport[5] != outReportBuffer[5];
+                }
                 else
                 {
                     outReportBuffer[0] = 0x05;
                     // enable rumble (0x01), lightbar (0x02), flash (0x04)
-                    outReportBuffer[1] = 0xf7;
+                    // outReportBuffer[1] = 0xf7;
+                    // outReportBuffer[2] = 0x04;
+                    outReportBuffer[1] = 0x03;
                     outReportBuffer[2] = 0x04;
                     outReportBuffer[4] = currentHap.RumbleMotorStrengthRightLightFast; // fast motor
                     outReportBuffer[5] = currentHap.RumbleMotorStrengthLeftHeavySlow; // slow  motor
