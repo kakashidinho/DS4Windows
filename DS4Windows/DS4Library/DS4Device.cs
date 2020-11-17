@@ -1026,6 +1026,37 @@ namespace DS4Windows
                     cState.L2 = inputReport[8];
                     cState.R2 = inputReport[9];
 
+                    // clamp left stick to circle
+                    int normX = (int)cState.LX - 0x80;
+                    int normY = (int)cState.LY - 0x80;
+                    if (normX != 0)
+                    {
+                        double dNormLX = normX;
+                        double dNormLY = normY;
+                        if (dNormLX * dNormLX + dNormLY * dNormLY > 127 * 127)
+                        {
+                            System.Diagnostics.Debug.WriteLine("dNormLX=" + dNormLX + " dNormLY=" + dNormLY);
+
+                            double a = dNormLY / dNormLX;
+                            double xSquare = (127 * 127) / (1 + a * a);
+                            double clampedX = System.Math.Sqrt(xSquare);
+                            double clampedY = a * clampedX;
+                            if (normX > 0)
+                            {
+                                cState.LX = (byte)(clampedX + 0x80);
+                                cState.LY = (byte)(clampedY + 0x80);
+                            }
+                            else
+                            {
+                                cState.LX = (byte)(-clampedX + 0x80);
+                                cState.LY = (byte)(-clampedY + 0x80);
+                            }
+
+                            System.Diagnostics.Debug.WriteLine("clampedX=" + clampedX + " clampedY=" + clampedY);
+                            System.Diagnostics.Debug.WriteLine("clamped LX=" + cState.LX + " clamped LY=" + cState.LY);
+                        }
+                    }
+
                     tempByte = inputReport[5];
                     cState.Triangle = (tempByte & (1 << 7)) != 0;
                     cState.Circle = (tempByte & (1 << 6)) != 0;
